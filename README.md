@@ -48,8 +48,10 @@ MongoDB client connection is left open to keep performance high during developme
 
 All admin-only routes are protected via both verifyToken and verifyAdmin middleware.
 
-🧑‍💻 Author
-MD Emon Hossen
-Backend Developer @ Quick Grab
+🧑‍💻 Author<br>
+MD Emon Hossen<br>
+Backend Developer @ Quick Grab<br>
 Available for freelance and collaboration.
+
+
 
