@@ -36,42 +36,6 @@ project-root/
 ├── .env # Environment variables (DB credentials, JWT secret)
 └── package.json # Project metadata and dependencies
 
-🧪 API Endpoints
-🔐 Auth
-Method	Endpoint	Description
-POST	/jwt	Generate JWT token
-
-👤 Users
-Method	Endpoint	Description
-GET	/users	Get all users (admin only)
-GET	/users/admin/:email	Check if user is admin
-POST	/users	Create a new user
-DELETE	/users/:id	Delete a user (admin only)
-PATCH	/users/admin/:id	Make user admin (admin only)
-
-📋 Menu
-Method	Endpoint	Description
-GET	/menu	Get all menu items
-
-🌟 Reviews
-Method	Endpoint	Description
-GET	/reviews	Get all customer reviews
-
-🛒 Cart
-Method	Endpoint	Description
-GET	/carts?email=	Get cart items for a user
-POST	/carts	Add item to cart
-DELETE	/carts/:id	Remove item from cart
-
-✅ Middleware
-verifyToken: Verifies JWT token from request headers.
-
-verifyAdmin: Checks if user has admin role.
-
-🧾 Usage
-bash
-Copy
-Edit
 # install dependencies
 npm install
 
@@ -89,13 +53,3 @@ MD Emon Hossen
 Backend Developer @ Quick Grab
 Available for freelance and collaboration.
 
-📃 License
-This project is licensed under the MIT License.
-
-yaml
-Copy
-Edit
-
----
-
-et me know if you'd like this turned into a downloadable file or deployed to GitHub with setup instructions!
