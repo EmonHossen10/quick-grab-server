@@ -107,7 +107,6 @@ async function run() {
       verifyAdmin,
       async (req, res) => {
         const id = req.params.id;
-        const user = req.body;
         const filter = { _id: new ObjectId(id) };
         const updateDoc = {
           $set: {
@@ -204,9 +203,10 @@ async function run() {
     });
 
     // payment intent
-    app.post("create-payment-intent", async (req, res) => {
+    app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
+      console.log(amount,'inside the backend')
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
