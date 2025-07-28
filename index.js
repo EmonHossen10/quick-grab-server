@@ -228,7 +228,7 @@ async function run() {
         res.status(500).send({ error: error.message });
       }
     });
-    app.get("/payments/:email",verifyToken, async (req, res) => {
+    app.get("/payments/:email", verifyToken, async (req, res) => {
       const query = { email: req.params.email };
 
       if (req.params.email !== req?.decoded.email) {
@@ -242,7 +242,6 @@ async function run() {
     app.post("/payments", async (req, res) => {
       const payment = req.body;
       const paymentResult = await paymentCollection.insertOne(payment);
-
       // carefully delete each item from the cart
       console.log("payment info", payment);
       const query = {
@@ -252,6 +251,38 @@ async function run() {
       };
       const deleteResult = await cartCollection.deleteMany(query);
       res.send({ paymentResult, deleteResult });
+    });
+
+    // analytics or stats
+    app.get("/admin-stats",verifyToken, verifyAdmin, async (req, res) => {
+      const users = await userCollection.estimatedDocumentCount();
+      const menuItems = await menuCollection.estimatedDocumentCount();
+      const orders = await paymentCollection.estimatedDocumentCount();
+      // this is not the best way to get stats
+      // const payments = await paymentCollection.find().toArray();
+      // const revenue = payments.reduce(
+      //   (total, payment) => total + payment.price,
+      //   0
+      // );
+      // this is the best way to get stats
+      const result = await paymentCollection
+        .aggregate([
+          {
+            $group: {
+              _id: null,
+              totalRevenue: { $sum: "$price" },
+            },
+          },
+        ])
+        .toArray();
+      const revenue = result.length > 0 ? result[0].totalRevenue : 0;
+
+      res.send({
+        users,
+        menuItems,
+        orders,
+        revenue,
+      });
     });
 
     // Send a ping to confirm a successful connection
