@@ -254,17 +254,11 @@ async function run() {
     });
 
     // analytics or stats
-    app.get("/admin-stats",verifyToken, verifyAdmin, async (req, res) => {
+    app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
       const users = await userCollection.estimatedDocumentCount();
       const menuItems = await menuCollection.estimatedDocumentCount();
       const orders = await paymentCollection.estimatedDocumentCount();
-      // this is not the best way to get stats
-      // const payments = await paymentCollection.find().toArray();
-      // const revenue = payments.reduce(
-      //   (total, payment) => total + payment.price,
-      //   0
-      // );
-      // this is the best way to get stats
+      
       const result = await paymentCollection
         .aggregate([
           {
