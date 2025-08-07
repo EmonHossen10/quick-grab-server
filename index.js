@@ -257,11 +257,9 @@ async function run() {
       try {
         const payment = req.body;
 
-        // ✅ Convert menuIds and cartIds to ObjectId
         const convertedMenuIds = payment.menuIds.map((id) => new ObjectId(id));
         const convertedCartIds = payment.cartIds.map((id) => new ObjectId(id));
 
-        // ✅ Build final payment object
         const finalPayment = {
           ...payment,
           menuIds: convertedMenuIds,
@@ -269,10 +267,7 @@ async function run() {
           date: new Date(), // optional: track payment time
         };
 
-        // ✅ Insert into paymentCollection
         const paymentResult = await paymentCollection.insertOne(finalPayment);
-
-        // ✅ Delete from cartCollection using converted ObjectIds
         const deleteResult = await cartCollection.deleteMany({
           _id: { $in: convertedCartIds },
         });
@@ -312,42 +307,52 @@ async function run() {
 
     // using aggregate pipeline to get the menu items by category
 
-    app.get("/order-stats", verifyToken, verifyAdmin, async (req, res) => {
-      const result = await paymentCollection
-        .aggregate([
-          {
-            $unwind: "$menuIds",
-          },
-          {
-            $lookup: {
-              from: "menu",
-              localField: "menuIds",
-              foreignField: "_id",
-              as: "menuItems",
+    app.get("/order-stats", async (req, res) => {
+      try {
+        const result = await paymentCollection
+          .aggregate([
+            {
+              $unwind: "$menuIds",
             },
-          },
-          {
-            $unwind: "$menuItems",
-          },
-          {
-            $group: {
-              _id: "$menuItems.category",
-              quantity: { $sum: 1 },
-              revenue: { $sum: "$menuItems.price" },
+            {
+              $lookup: {
+                from: "menu",
+                localField: "menuIds",
+                foreignField: "_id",
+                as: "menuItems",
+              },
             },
-          },
-          {
-            $project: {
-              _id: 0,
-              category: "$_id",
-              quantity: 1,
-              revenue: 1,
+            {
+              $unwind: "$menuItems",
             },
-          },
-        ])
-        .toArray();
-      res.send(result);
+            {
+              $group: {
+                _id: "$menuItems.category",
+                quantity: { $sum: 1 },
+                revenue: { $sum: "$menuItems.price" },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                category: "$_id",
+                quantity: 1,
+                revenue: { $round: ["$revenue", 2] },
+              },
+            },
+            {
+              $sort: { revenue: -1 }, // optional: sort by revenue
+            },
+          ])
+          .toArray();
+
+        res.send(result);
+      } catch (err) {
+        console.error("Failed to fetch order stats:", err);
+        res.status(500).send("Failed to fetch order statistics.");
+      }
     });
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
