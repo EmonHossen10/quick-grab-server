@@ -279,6 +279,26 @@ async function run() {
       });
     });
 
+
+    // using aggregate pipeline to get the menu items by category
+
+    app.get("/order-stats", async(req,res)=>{
+      const result= await paymentCollection.aggregate([
+        // {
+        //   $unwind: "$menuIds"
+        // },
+        // {
+        //   $lookup: {
+        //     from: "menu",
+        //     localField: "menuIds",
+        //     foreignField: "_id",
+        //     as: "menuItems"
+        //   }
+        // }
+      ]).toArray();
+      res.send(result);
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
