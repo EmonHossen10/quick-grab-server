@@ -239,18 +239,49 @@ async function run() {
       res.send(result);
     });
 
+    // app.post("/payments", async (req, res) => {
+    //   const payment = req.body;
+    //   const paymentResult = await paymentCollection.insertOne(payment);
+    //   // carefully delete each item from the cart
+    //   console.log("payment info", payment);
+    //   const query = {
+    //     _id: {
+    //       $in: payment.cartIds.map((id) => new ObjectId(id)),
+    //     },
+    //   };
+    //   const deleteResult = await cartCollection.deleteMany(query);
+    //   res.send({ paymentResult, deleteResult });
+    // });
+
     app.post("/payments", async (req, res) => {
-      const payment = req.body;
-      const paymentResult = await paymentCollection.insertOne(payment);
-      // carefully delete each item from the cart
-      console.log("payment info", payment);
-      const query = {
-        _id: {
-          $in: payment.cartIds.map((id) => new ObjectId(id)),
-        },
-      };
-      const deleteResult = await cartCollection.deleteMany(query);
-      res.send({ paymentResult, deleteResult });
+      try {
+        const payment = req.body;
+
+        // ✅ Convert menuIds and cartIds to ObjectId
+        const convertedMenuIds = payment.menuIds.map((id) => new ObjectId(id));
+        const convertedCartIds = payment.cartIds.map((id) => new ObjectId(id));
+
+        // ✅ Build final payment object
+        const finalPayment = {
+          ...payment,
+          menuIds: convertedMenuIds,
+          cartIds: convertedCartIds,
+          date: new Date(), // optional: track payment time
+        };
+
+        // ✅ Insert into paymentCollection
+        const paymentResult = await paymentCollection.insertOne(finalPayment);
+
+        // ✅ Delete from cartCollection using converted ObjectIds
+        const deleteResult = await cartCollection.deleteMany({
+          _id: { $in: convertedCartIds },
+        });
+
+        res.send({ paymentResult, deleteResult });
+      } catch (err) {
+        console.error("Payment processing failed:", err);
+        res.status(500).send("Something went wrong during payment.");
+      }
     });
 
     // analytics or stats
@@ -258,7 +289,7 @@ async function run() {
       const users = await userCollection.estimatedDocumentCount();
       const menuItems = await menuCollection.estimatedDocumentCount();
       const orders = await paymentCollection.estimatedDocumentCount();
-      
+
       const result = await paymentCollection
         .aggregate([
           {
@@ -279,25 +310,44 @@ async function run() {
       });
     });
 
-
     // using aggregate pipeline to get the menu items by category
 
-    app.get("/order-stats", async(req,res)=>{
-      const result= await paymentCollection.aggregate([
-        // {
-        //   $unwind: "$menuIds"
-        // },
-        // {
-        //   $lookup: {
-        //     from: "menu",
-        //     localField: "menuIds",
-        //     foreignField: "_id",
-        //     as: "menuItems"
-        //   }
-        // }
-      ]).toArray();
+    app.get("/order-stats", verifyToken, verifyAdmin, async (req, res) => {
+      const result = await paymentCollection
+        .aggregate([
+          {
+            $unwind: "$menuIds",
+          },
+          {
+            $lookup: {
+              from: "menu",
+              localField: "menuIds",
+              foreignField: "_id",
+              as: "menuItems",
+            },
+          },
+          {
+            $unwind: "$menuItems",
+          },
+          {
+            $group: {
+              _id: "$menuItems.category",
+              quantity: { $sum: 1 },
+              revenue: { $sum: "$menuItems.price" },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              category: "$_id",
+              quantity: 1,
+              revenue: 1,
+            },
+          },
+        ])
+        .toArray();
       res.send(result);
-    })
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
