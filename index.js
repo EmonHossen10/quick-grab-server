@@ -37,6 +37,9 @@ async function run() {
     const reviewsCollection = client.db("quickDb").collection("reviews");
     const cartCollection = client.db("quickDb").collection("carts");
     const paymentCollection = client.db("quickDb").collection("payments");
+    const reservationCollection = client
+      .db("quickDb")
+      .collection("reservations");
 
     // jwt related api
     app.post("/jwt", async (req, res) => {
@@ -241,20 +244,6 @@ async function run() {
       res.send(result);
     });
 
-    // app.post("/payments", async (req, res) => {
-    //   const payment = req.body;
-    //   const paymentResult = await paymentCollection.insertOne(payment);
-    //   // carefully delete each item from the cart
-    //   console.log("payment info", payment);
-    //   const query = {
-    //     _id: {
-    //       $in: payment.cartIds.map((id) => new ObjectId(id)),
-    //     },
-    //   };
-    //   const deleteResult = await cartCollection.deleteMany(query);
-    //   res.send({ paymentResult, deleteResult });
-    // });
-
     app.post("/payments", async (req, res) => {
       try {
         const payment = req.body;
@@ -280,6 +269,53 @@ async function run() {
       } catch (err) {
         console.error("Payment processing failed:", err);
         res.status(500).send("Something went wrong during payment.");
+      }
+    });
+
+    app.post("/reservations", verifyToken, async (req, res) => {
+      try {
+        const reservation = req.body;
+
+        // Ensure the email in the reservation matches the authenticated user
+        if (reservation.email !== req?.decoded.email) {
+          return res.status(403).send({ message: "Forbidden access" });
+        }
+
+        reservation.createdAt = new Date();
+
+        const result = await reservationCollection.insertOne(reservation);
+
+        res.send({
+          success: true,
+          reservationId: result.insertedId,
+          message: "Reservation confirmed!",
+        });
+
+        // Optional: send confirmation email here using EmailJS
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ success: false, message: "Reservation failed" });
+      }
+    });
+
+    // GET all reservations for a user
+    app.get("/reservations/:email", verifyToken, async (req, res) => {
+      try {
+        const userEmail = req.params.email;
+
+        // Verify that the email matches the token
+        if (userEmail !== req?.decoded.email) {
+          return res.status(403).send({ message: "Forbidden access" });
+        }
+
+        const reservations = await reservationCollection
+          .find({ email: userEmail })
+          .toArray();
+
+        res.send(reservations);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: "Failed to fetch reservations" });
       }
     });
 
