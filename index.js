@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const formData = require("form-data");
+
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -272,6 +274,8 @@ async function run() {
           _id: { $in: convertedCartIds },
         });
 
+        // send email to user to confirm the payment he/she made
+
         res.send({ paymentResult, deleteResult });
       } catch (err) {
         console.error("Payment processing failed:", err);
@@ -352,7 +356,6 @@ async function run() {
         res.status(500).send("Failed to fetch order statistics.");
       }
     });
-    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
