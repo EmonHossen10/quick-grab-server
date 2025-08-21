@@ -1,11 +1,12 @@
 # 🚀 Quick Grab Server
 
-[![Live Site](https://img.shields.io/badge/Live_Site-Quick_Grab-8A2BE2?style=for-the-badge&logo=vercel)](https://quick-grab-frontend.vercel.app/)
+[![Live Site](https://img.shields.io/badge/Live_Site-Quick_Grab-8A2BE2?style=for-the-badge&logo=vercel)](https://quick-grab-frontend.vercel.app/)  
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-green?style=for-the-badge&logo=node.js)](https://nodejs.org/)  
 [![Express](https://img.shields.io/badge/Express-4.19.2-black?style=for-the-badge)](https://expressjs.com/)  
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.8.0-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)  
 [![Stripe](https://img.shields.io/badge/Stripe-18.3.0-blue?style=for-the-badge&logo=stripe)](https://stripe.com/)  
-[![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](LICENSE)  
+
 
 ---
 
