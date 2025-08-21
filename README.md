@@ -1,5 +1,6 @@
 # 🚀 Quick Grab Server
 
+[![Live Server](https://img.shields.io/badge/Live_Server-Quick_Grab-8A2BE2?style=for-the-badge&logo=vercel)](https://quick-grab-server.vercel.app/)  
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-green?style=for-the-badge&logo=node.js)](https://nodejs.org/)  
 [![Express](https://img.shields.io/badge/Express-4.19.2-black?style=for-the-badge)](https://expressjs.com/)  
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.8.0-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)  
